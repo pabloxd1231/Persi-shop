@@ -1,4 +1,4 @@
-// --- Variables y referencias ---
+// --- Variables ---
 const loginBtn = document.getElementById('loginBtn');
 const loginContainer = document.getElementById('loginContainer');
 const mainContent = document.getElementById('mainContent');
@@ -7,17 +7,26 @@ const volverBtn = document.getElementById('volverBtn');
 const productosContainer = document.querySelector('.productos-container');
 const carritoBtn = document.getElementById('carritoBtn');
 const pagarBtn = document.getElementById('pagarBtn');
-
-// Carrito
 const carritoPanel = document.getElementById('carritoPanel');
 const cerrarCarrito = document.getElementById('cerrarCarrito');
 const carritoItemsDiv = document.querySelector('.carrito-items');
 const carritoTotalSpan = document.getElementById('carritoTotal');
+const promoInput = document.getElementById('promoInput');
+const aplicarPromo = document.getElementById('aplicarPromo');
 
 let usuario = "";
 let carrito = [];
+let descuento = 0;
 
-// --- Lista fija de productos con fotos reales ---
+// --- Promocodes ---
+const promoCodes = {
+  "PERSI10": 0.10,
+  "FUEGO20": 0.20,
+  "VIP30": 0.30
+};
+
+// --- Lista de productos (igual que antes, 13 fijos con fotos reales) ---
+// --- Lista de productos personalizada ---
 const productosData = [
   { id: 1, nombre: "Spofity", precio: 35.99, img: "https://cdn.discordapp.com/attachments/1420943010857746493/1421308846927773696/public-20.jpg?ex=68d89083&is=68d73f03&hm=ab2762e9e652484d3fc6553d64016a9304ec598f4b286c398eb357c93e700bcb&" },
   { id: 2, nombre: "ExitLag", precio: 49.90, img: "https://cdn.discordapp.com/attachments/1420943010857746493/1421308847271841872/public-11.jpg?ex=68d89083&is=68d73f03&hm=99a7a397d03a50411e6f60a2ca359a9097a207fa8a587b74695857dddcff8ea6&" },
@@ -33,20 +42,17 @@ const productosData = [
   { id: 12, nombre: "Spofity", precio: 89.00, img: "https://cdn.discordapp.com/attachments/1420943010857746493/1421308868419522632/public-202.jpg?ex=68d89088&is=68d73f08&hm=a850408c8865fbedea9836f0354e02c5947f6a03153f767f3ca62c4f9c006a85&" },
 ];
 
-// --- Funciones carrito por usuario ---
-function nombreCarrito() {
-  if(usuario === 'p') return 'carrito_p';
-  else return 'carrito_' + usuario;
-}
 
+// --- Carrito ---
+function nombreCarrito() {
+  return usuario === 'p' ? 'carrito_p' : 'carrito_' + usuario;
+}
 function cargarCarrito() {
   carrito = JSON.parse(localStorage.getItem(nombreCarrito())) || [];
 }
-
 function guardarCarrito() {
   localStorage.setItem(nombreCarrito(), JSON.stringify(carrito));
 }
-
 function actualizarCarrito(){
   cargarCarrito();
   carritoItemsDiv.innerHTML = '';
@@ -67,6 +73,9 @@ function actualizarCarrito(){
     carritoItemsDiv.appendChild(div);
     total += item.precio;
   });
+  if (descuento > 0) {
+    total = total - (total * descuento);
+  }
   carritoTotalSpan.textContent = total.toFixed(2);
 }
 
@@ -101,62 +110,62 @@ function crearProducto(prod){
   return producto;
 }
 
-// --- Renderizar productos en filas 5+5+3 ---
+// --- Render filas 5+5+3 ---
 function renderProductos(){
   productosContainer.innerHTML = '';
   let index = 0;
-
-  // Primera fila (5)
-  let fila1 = document.createElement('div');
-  fila1.className = 'fila-productos';
-  for (let i=0; i<5; i++) {
-    fila1.appendChild(crearProducto(productosData[index]));
-    index++;
-  }
-  productosContainer.appendChild(fila1);
-
-  // Segunda fila (5)
-  let fila2 = document.createElement('div');
-  fila2.className = 'fila-productos';
-  for (let i=0; i<5; i++) {
-    fila2.appendChild(crearProducto(productosData[index]));
-    index++;
-  }
-  productosContainer.appendChild(fila2);
-
-  // Tercera fila (3)
-  let fila3 = document.createElement('div');
-  fila3.className = 'fila-productos';
-  for (let i=0; i<3; i++) {
-    fila3.appendChild(crearProducto(productosData[index]));
-    index++;
-  }
-  productosContainer.appendChild(fila3);
+  [5,5,3].forEach(cantidad => {
+    const fila = document.createElement('div');
+    fila.className = 'fila-productos';
+    for (let i=0; i<cantidad; i++) {
+      fila.appendChild(crearProducto(productosData[index]));
+      index++;
+    }
+    productosContainer.appendChild(fila);
+  });
 }
 
-// --- Eventos botones ---
+// --- Eventos ---
 comprarBtn.addEventListener('click', ()=>{
   mainContent.style.display = 'none';
   productosContainer.style.display = 'flex';
   volverBtn.style.display = 'block';
   renderProductos();
 });
-
 volverBtn.addEventListener('click', ()=>{
   productosContainer.style.display = 'none';
   volverBtn.style.display = 'none';
   mainContent.style.display = 'flex';
 });
-
 carritoBtn.addEventListener('click', ()=>{
   actualizarCarrito();
   carritoPanel.classList.add('active');
 });
-
 cerrarCarrito.addEventListener('click', ()=>{
   carritoPanel.classList.remove('active');
 });
-
 pagarBtn.addEventListener('click', ()=>{
-  alert("confirmar pago en discord. Total: $" + carrito.reduce((a,b)=>a+b.precio,0).toFixed(2));
+  alert("Pago simulado. Total: $" + carrito.reduce((a,b)=>a+b.precio,0).toFixed(2));
 });
+aplicarPromo.addEventListener('click', ()=>{
+  const code = promoInput.value.trim().toUpperCase();
+  if (promoCodes[code]) {
+    descuento = promoCodes[code];
+    alert("Código aplicado: -" + (descuento*100) + "%");
+  } else {
+    descuento = 0;
+    alert("Código inválido");
+  }
+  actualizarCarrito();
+});
+
+// --- Puntos de fondo ---
+const background = document.getElementById('background');
+for (let i=0; i<50; i++){
+  const point = document.createElement('div');
+  point.className = 'point';
+  point.style.left = Math.random()*100 + "vw";
+  point.style.animationDuration = (3 + Math.random()*5) + "s";
+  point.style.animationDelay = (Math.random()*5) + "s";
+  background.appendChild(point);
+}
