@@ -8,6 +8,9 @@
 </head>
 <body>
 
+  <!-- Fondo animado -->
+  <div class="background" id="background"></div>
+
   <!-- Login -->
   <div class="login-container" id="loginContainer">
     <h2>Bienvenido a PERSI SHOP</h2>
@@ -17,8 +20,6 @@
 
   <!-- Contenido principal -->
   <div class="main-content" id="mainContent" style="display:none;">
-    <div class="fuego"></div>
-    
     <div class="fila" id="inicio">
       <h1 class="titulo">PERSI SHOP</h1>
     </div>
@@ -41,7 +42,9 @@
     </div>
     <div class="carrito-items"></div>
     <div class="carrito-total">
-      Total: $<span id="carritoTotal">0.00</span>
+      Total: $<span id="carritoTotal">0.00</span><br>
+      <input type="text" id="promoInput" placeholder="Código promo">
+      <button id="aplicarPromo">Aplicar</button>
     </div>
   </div>
 
